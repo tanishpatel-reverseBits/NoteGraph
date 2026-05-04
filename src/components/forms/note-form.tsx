@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
@@ -11,10 +11,9 @@ import type { Note } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { BrokenLinkBadge } from "@/components/notes/broken-link-badge";
 import { TagChipInput } from "@/components/forms/tag-chip-input";
-import { WikilinkSuggest } from "@/components/forms/wikilink-suggest";
+import { RichEditor } from "@/components/forms/rich-editor";
 import { useCreateNote, useUpdateNote } from "@/hooks/use-notes";
 import { cn } from "@/lib/utils";
 
@@ -42,8 +41,6 @@ export function NoteForm({
   className,
   autosaveMs = 1500,
 }: NoteFormProps) {
-  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
-  const [caret, setCaret] = useState<number | null>(null);
   const createNote = useCreateNote();
   const updateNote = useUpdateNote(note?.id ?? "");
   const mutation = note ? updateNote : createNote;
@@ -98,10 +95,6 @@ export function NoteForm({
   const submitCurrent = useCallback(() => {
     void form.handleSubmit((values) => performSave(values, "submit"))();
   }, [form, performSave]);
-
-  function updateCaret() {
-    setCaret(textareaRef.current?.selectionStart ?? null);
-  }
 
   const bodyValue = useWatch({ control: form.control, name: "body" }) ?? "";
   const isDirty = form.formState.isDirty;
@@ -171,7 +164,7 @@ export function NoteForm({
         render={({ field, fieldState }) => (
           <div className="space-y-2">
             <div className="flex items-end justify-between gap-2">
-              <Label htmlFor="note-body">Body</Label>
+              <Label id="note-body-label">Body</Label>
               {bodyCounter ? (
                 <span
                   className={cn(
@@ -185,38 +178,12 @@ export function NoteForm({
                 </span>
               ) : null}
             </div>
-            <div className="relative">
-              <Textarea
-                id="note-body"
-                aria-invalid={Boolean(fieldState.error)}
-                className="min-h-72 resize-y font-mono text-sm leading-6"
-                placeholder="Write with [[wikilinks]]"
-                {...field}
-                ref={(node) => {
-                  field.ref(node);
-                  textareaRef.current = node;
-                }}
-                onBlur={(event) => {
-                  field.onBlur();
-                  setCaret(event.currentTarget.selectionStart);
-                }}
-                onClick={updateCaret}
-                onKeyUp={updateCaret}
-                onSelect={updateCaret}
-              />
-              <WikilinkSuggest
-                value={bodyValue}
-                caret={caret}
-                onInsert={(nextValue, nextCaret) => {
-                  field.onChange(nextValue);
-                  requestAnimationFrame(() => {
-                    textareaRef.current?.focus();
-                    textareaRef.current?.setSelectionRange(nextCaret, nextCaret);
-                    setCaret(nextCaret);
-                  });
-                }}
-              />
-            </div>
+            <RichEditor
+              value={field.value ?? ""}
+              onChange={(md) => field.onChange(md)}
+              invalid={Boolean(fieldState.error)}
+              ariaLabelledBy="note-body-label"
+            />
             {fieldState.error ? (
               <p className="text-sm text-destructive">{fieldState.error.message}</p>
             ) : null}

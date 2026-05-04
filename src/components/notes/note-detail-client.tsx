@@ -88,8 +88,8 @@ export function NoteDetailClient({ noteId }: NoteDetailClientProps) {
       <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-6 px-4 py-6">
         <Skeleton className="h-8 w-32" />
         <div className="grid gap-6 md:grid-cols-[minmax(0,1fr)_22rem]">
-          <Skeleton className="h-80 w-full" />
-          <Skeleton className="h-80 w-full" />
+          <Skeleton className="h-80 w-full rounded-xl" />
+          <Skeleton className="h-80 w-full rounded-xl" />
         </div>
       </main>
     );
@@ -107,7 +107,7 @@ export function NoteDetailClient({ noteId }: NoteDetailClientProps) {
           <ArrowLeft data-icon="inline-start" />
           Notes
         </Link>
-        <div className="rounded-lg border border-dashed border-border p-6">
+        <div className="rounded-xl border border-dashed border-border p-8">
           <h1 className="text-xl font-semibold">
             {isDeleted ? `"${info?.title}" was deleted` : "Note not found"}
           </h1>
@@ -133,32 +133,37 @@ export function NoteDetailClient({ noteId }: NoteDetailClientProps) {
   }
 
   return (
-    <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-6 px-4 py-6">
+    <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-5 px-4 py-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <Link
           href="/notes"
-          className={cn(buttonVariants({ variant: "ghost" }), "w-fit")}
+          className={cn(buttonVariants({ variant: "ghost", size: "sm" }), "w-fit")}
         >
           <ArrowLeft data-icon="inline-start" />
           Notes
         </Link>
-        <div className="flex gap-2">
-          <Link href="/graph" className={buttonVariants({ variant: "outline" })}>
+        <div className="flex flex-wrap items-center gap-2">
+          <Link
+            href="/graph"
+            className={buttonVariants({ variant: "outline", size: "sm" })}
+          >
             <Network data-icon="inline-start" />
             Graph
           </Link>
           <Button
             type="button"
             variant="outline"
+            size="sm"
             disabled={isExporting}
             onClick={() => handleExport("md")}
           >
             <Download data-icon="inline-start" />
-            {isExporting ? "Exporting" : "Export .md"}
+            {isExporting ? "Exporting" : ".md"}
           </Button>
           <Button
             type="button"
             variant="outline"
+            size="sm"
             disabled={isExporting}
             onClick={() => handleExport("json")}
           >
@@ -166,7 +171,7 @@ export function NoteDetailClient({ noteId }: NoteDetailClientProps) {
             .json
           </Button>
           <Dialog>
-            <DialogTrigger render={<Button variant="destructive" />}>
+            <DialogTrigger render={<Button variant="destructive" size="sm" />}>
               <Trash2 data-icon="inline-start" />
               Delete
             </DialogTrigger>
@@ -174,7 +179,7 @@ export function NoteDetailClient({ noteId }: NoteDetailClientProps) {
               <DialogHeader>
                 <DialogTitle>Delete note?</DialogTitle>
                 <DialogDescription>
-                  The note will be hidden, and incoming links will be marked broken.
+                  Note hidden, incoming links marked broken.
                 </DialogDescription>
               </DialogHeader>
               <DialogFooter>
@@ -192,18 +197,18 @@ export function NoteDetailClient({ noteId }: NoteDetailClientProps) {
         </div>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-[minmax(0,1fr)_22rem]">
-        <section className="min-w-0 rounded-lg border border-border p-4">
-          <div className="mb-4 flex flex-wrap items-center gap-2">
-            <h1 className="min-w-0 flex-1 truncate text-2xl font-semibold">
+      <div className="grid gap-5 md:grid-cols-[minmax(0,1fr)_22rem]">
+        <section className="min-w-0 rounded-xl border border-border bg-card">
+          <div className="flex flex-wrap items-center gap-2 border-b border-border px-5 py-4">
+            <h1 className="min-w-0 flex-1 truncate text-xl font-semibold tracking-tight">
               {note.title}
             </h1>
             {note.isPlaceholder ? <BrokenLinkBadge state="placeholder" /> : null}
-            <div className="ml-auto inline-flex rounded-lg bg-muted p-0.5">
+            <div className="ml-auto inline-flex rounded-lg border border-border bg-muted/40 p-0.5">
               <button
                 type="button"
                 className={cn(
-                  "inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium transition-colors",
+                  "inline-flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-medium transition-colors",
                   mode === "view"
                     ? "bg-background text-foreground shadow-sm"
                     : "text-muted-foreground hover:text-foreground",
@@ -215,7 +220,7 @@ export function NoteDetailClient({ noteId }: NoteDetailClientProps) {
               <button
                 type="button"
                 className={cn(
-                  "inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium transition-colors",
+                  "inline-flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-medium transition-colors",
                   mode === "edit"
                     ? "bg-background text-foreground shadow-sm"
                     : "text-muted-foreground hover:text-foreground",
@@ -226,38 +231,41 @@ export function NoteDetailClient({ noteId }: NoteDetailClientProps) {
               </button>
             </div>
           </div>
-          {mode === "view" ? (
-            <NoteView body={note.body} outgoingLinks={note.outgoingLinks} />
-          ) : (
-            <NoteEditor note={note} />
-          )}
+          <div className="px-5 py-5">
+            {mode === "view" ? (
+              <NoteView body={note.body} outgoingLinks={note.outgoingLinks} />
+            ) : (
+              <NoteEditor note={note} />
+            )}
 
-          {note.outgoingLinks.length > 0 ? (
-            <div className="mt-6 border-t border-border pt-4">
-              <h2 className="text-sm font-medium">Outgoing links</h2>
-              <div className="mt-2 flex flex-wrap gap-2">
-                {note.outgoingLinks.map((link) => (
-                  <span
-                    key={link.id}
-                    className="inline-flex items-center gap-2 rounded-lg border border-border px-2 py-1 text-sm"
-                  >
-                    {link.targetTitle}
-                    {link.isBroken ? <BrokenLinkBadge state="broken" /> : null}
-                  </span>
-                ))}
+            {note.outgoingLinks.length > 0 ? (
+              <div className="mt-6 border-t border-border pt-4">
+                <h2 className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                  Outgoing links
+                </h2>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {note.outgoingLinks.map((link) => (
+                    <span
+                      key={link.id}
+                      className="inline-flex items-center gap-2 rounded-md border border-border bg-background px-2 py-1 text-sm"
+                    >
+                      {link.targetTitle}
+                      {link.isBroken ? <BrokenLinkBadge state="broken" /> : null}
+                    </span>
+                  ))}
+                </div>
               </div>
-            </div>
-          ) : null}
+            ) : null}
+          </div>
         </section>
 
-        <aside className="min-w-0 rounded-lg border border-border">
-          <div className="border-b border-border p-4">
-            <h2 className="text-base font-semibold">Context</h2>
-            <div className="mt-3 grid grid-cols-2 rounded-lg bg-muted p-1">
+        <aside className="min-w-0 rounded-xl border border-border bg-card">
+          <div className="border-b border-border px-4 py-3">
+            <div className="grid grid-cols-2 rounded-lg border border-border bg-muted/40 p-0.5">
               <button
                 type="button"
                 className={cn(
-                  "h-8 rounded-md text-sm font-medium transition-colors",
+                  "h-7 rounded-md text-xs font-medium transition-colors",
                   activePanel === "backlinks"
                     ? "bg-background text-foreground shadow-sm"
                     : "text-muted-foreground hover:text-foreground",
@@ -269,7 +277,7 @@ export function NoteDetailClient({ noteId }: NoteDetailClientProps) {
               <button
                 type="button"
                 className={cn(
-                  "h-8 rounded-md text-sm font-medium transition-colors",
+                  "h-7 rounded-md text-xs font-medium transition-colors",
                   activePanel === "versions"
                     ? "bg-background text-foreground shadow-sm"
                     : "text-muted-foreground hover:text-foreground",

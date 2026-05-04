@@ -38,22 +38,29 @@ export function NotesPageClient() {
   }, [allNotesQuery.data]);
 
   return (
-    <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-6 px-4 py-6">
-      <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+    <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-5 px-4 py-6">
+      <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold">Notes</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">Notes</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Search titles, filter by tag, and open notes into the graph.
+            Search titles, filter by tag, jump into the graph.
           </p>
         </div>
-        <NewNoteDialog
-          trigger={
-            <Button type="button" className="w-fit">
-              <Plus data-icon="inline-start" />
-              New note
-            </Button>
-          }
-        />
+        <div className="flex items-center gap-2">
+          {allNotesQuery.data ? (
+            <span className="rounded-md border border-border bg-muted/30 px-2 py-1 text-xs text-muted-foreground">
+              {allNotesQuery.data.length} note{allNotesQuery.data.length === 1 ? "" : "s"}
+            </span>
+          ) : null}
+          <NewNoteDialog
+            trigger={
+              <Button type="button" className="w-fit">
+                <Plus data-icon="inline-start" />
+                New note
+              </Button>
+            }
+          />
+        </div>
       </div>
 
       <SearchBar
@@ -65,13 +72,13 @@ export function NotesPageClient() {
       />
 
       {searchQuery.isLoading ? (
-        <div className="space-y-2">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <Skeleton key={i} className="h-16 w-full" />
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <Skeleton key={i} className="h-28 w-full rounded-xl" />
           ))}
         </div>
       ) : searchQuery.error ? (
-        <div className="rounded-lg border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">
+        <div className="rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">
           {searchQuery.error.message}
         </div>
       ) : (
