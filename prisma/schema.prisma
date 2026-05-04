@@ -1,0 +1,56 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Note {
+  id            String                       @id @default(cuid())
+  title         String                       @unique
+  body          String                       @default("")
+  tags          String[]                     @default([])
+  isPlaceholder Boolean                      @default(false)
+  deletedAt     DateTime?
+  createdAt     DateTime                     @default(now())
+  updatedAt     DateTime                     @updatedAt
+  searchVector  Unsupported("tsvector")?
+
+  versions      Version[]
+  outgoingLinks Link[]                       @relation("OutgoingLinks")
+  incomingLinks Link[]                       @relation("IncomingLinks")
+
+  @@index([deletedAt])
+  @@index([isPlaceholder])
+  @@index([searchVector], type: Gin)
+}
+
+model Version {
+  id        String   @id @default(cuid())
+  noteId    String
+  version   Int
+  body      String
+  createdAt DateTime @default(now())
+
+  note Note @relation(fields: [noteId], references: [id], onDelete: Cascade)
+
+  @@unique([noteId, version])
+  @@index([noteId, version])
+}
+
+model Link {
+  id           String   @id @default(cuid())
+  sourceNoteId String
+  targetTitle  String
+  targetNoteId String?
+  isBroken     Boolean  @default(false)
+  createdAt    DateTime @default(now())
+
+  source Note  @relation("OutgoingLinks", fields: [sourceNoteId], references: [id], onDelete: Cascade)
+  target Note? @relation("IncomingLinks", fields: [targetNoteId], references: [id], onDelete: SetNull)
+
+  @@index([sourceNoteId])
+  @@index([targetNoteId])
+  @@index([targetTitle])
+}

@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: notegraph-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: notegraph
+      POSTGRES_PASSWORD: notegraph
+      POSTGRES_DB: notegraph
+    ports:
+      - "5433:5432"
+    volumes:
+      - notegraph_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U notegraph -d notegraph"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  notegraph_pgdata:
