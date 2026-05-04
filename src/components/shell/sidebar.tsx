@@ -6,6 +6,7 @@ import { FileText, Network, Plus, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { NewNoteDialog } from "@/components/notes/new-note-dialog";
+import { Logo } from "@/components/shell/logo";
 
 const NAV = [
   { href: "/notes", label: "Notes", icon: FileText },
@@ -18,7 +19,11 @@ export function Sidebar() {
 
   return (
     <aside className="flex w-56 shrink-0 flex-col gap-4 border-r border-border bg-muted/20 px-3 py-4">
-      <Link href="/notes" className="px-2 text-lg font-semibold">
+      <Link
+        href="/notes"
+        className="flex items-center gap-2 px-2 text-lg font-semibold tracking-tight"
+      >
+        <Logo />
         NoteGraph
       </Link>
 
