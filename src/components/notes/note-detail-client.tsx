@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
-import { ArrowLeft, Eye, Network, Pencil, Trash2 } from "lucide-react";
+import { ArrowLeft, Download, Eye, Network, Pencil, Trash2 } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Dialog,
@@ -16,6 +16,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { useDeleteNote, useNote, useNoteInfo, useRestoreNote } from "@/hooks/use-notes";
+import { exportNote } from "@/hooks/use-export";
 import { BacklinksPanel } from "@/components/notes/backlinks-panel";
 import { BrokenLinkBadge } from "@/components/notes/broken-link-badge";
 import { NoteEditor } from "@/components/notes/note-editor";
@@ -39,6 +40,22 @@ export function NoteDetailClient({ noteId }: NoteDetailClientProps) {
   const infoQuery = useNoteInfo(noteId, !noteQuery.isLoading && !note);
   const deleteNote = useDeleteNote();
   const restoreNote = useRestoreNote();
+  const [isExporting, setIsExporting] = useState(false);
+
+  async function handleExport(format: "md" | "json") {
+    setIsExporting(true);
+    try {
+      await exportNote(noteId, format);
+      toast.success(`Exported as .${format}`, { id: `export-${noteId}` });
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Export failed",
+        { id: `export-${noteId}` },
+      );
+    } finally {
+      setIsExporting(false);
+    }
+  }
 
   async function handleDelete() {
     try {
@@ -130,6 +147,24 @@ export function NoteDetailClient({ noteId }: NoteDetailClientProps) {
             <Network data-icon="inline-start" />
             Graph
           </Link>
+          <Button
+            type="button"
+            variant="outline"
+            disabled={isExporting}
+            onClick={() => handleExport("md")}
+          >
+            <Download data-icon="inline-start" />
+            {isExporting ? "Exporting" : "Export .md"}
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            disabled={isExporting}
+            onClick={() => handleExport("json")}
+          >
+            <Download data-icon="inline-start" />
+            .json
+          </Button>
           <Dialog>
             <DialogTrigger render={<Button variant="destructive" />}>
               <Trash2 data-icon="inline-start" />
